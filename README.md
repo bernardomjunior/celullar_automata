@@ -1,0 +1,1 @@
+# Celullar Automata Creation to simulate Cholera
