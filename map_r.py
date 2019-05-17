@@ -27,8 +27,11 @@ class Map:
     def __get_next_status(self, cell):
         neighbors = self.__get_neighbors(cell)
         c_number = self.desease.contamination_number
-        if self.__count_d_nei(neighbors) >= c_number:
-            cell.next_state = INFECTIOUS
+        infect_duration = self.desease.infection_duration
+        if cell.state == INFECTIOUS and cell.get_counter_state() >= infect_duration:
+            cell.next_state = RECOVERED
+        elif cell.state == SUSCEPTIBLE and self.__count_d_nei(neighbors) >= c_number:
+            cell.next_state = INFECTIOUS 
            
     def next_t(self):
         [self.__get_next_status(cell) for cell in self.cells]

@@ -12,3 +12,6 @@ class Cell:
             return
         self.state = self.next_state
         self.__counter_state = 0
+
+    def get_counter_state(self):
+        return self.__counter_state

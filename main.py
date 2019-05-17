@@ -40,9 +40,12 @@ cells = susceptibles + infecteds
 desease = Desease(3, 1, spread_function)
 
 map_1 = Map(grid_size, grid_size, cells, desease)
-print_matrix(map_1.map)
-map_1.next_t()
-print_matrix(map_1.map)
+
+
+while True:
+    print_matrix(map_1.map)
+    input("press enter to change t")
+    map_1.next_t()
 
 
 
