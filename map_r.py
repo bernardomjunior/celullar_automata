@@ -16,7 +16,7 @@ class Map:
         [self.map.update({cell.position: cell}) for cell in self.cells]
     
     def __get_neighbors(self, cell):
-        possible_neighbors = self.desease.neighborhood_1(*cell.position)
+        possible_neighbors = self.desease.cholera_neighborhood(*cell.position)
         neighbors = [self.map[pos] for pos in possible_neighbors if pos in self.map]
         return neighbors
 
@@ -29,9 +29,9 @@ class Map:
         c_number = self.desease.contamination_number
         infect_duration = self.desease.infection_duration
         if cell.state == INFECTIOUS and cell.get_counter_state() >= infect_duration:
-            cell.next_state = RECOVERED
+            cell.next_state = SUSCEPTIBLE
         elif cell.state == SUSCEPTIBLE and self.__count_d_nei(neighbors) >= c_number:
-            cell.next_state = INFECTIOUS 
+            cell.next_state = INFECTIOUS
            
     def next_t(self):
         [self.__get_next_status(cell) for cell in self.cells]
