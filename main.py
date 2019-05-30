@@ -11,10 +11,7 @@ SUSCEPTIBLE = "S"
 INFECTIOUS = "I"
 RECOVERED = "R"
 
-grid_size = 50
-population = 1500
 
-s_ratio = 0.7
 
 def print_matrix(map_m):
     matrix = {}
@@ -27,23 +24,32 @@ def print_matrix(map_m):
     df = pd.DataFrame(matrix)
     print( df.to_string(na_rep="-"))
 
-possible_positions = list(product(range(grid_size), range(grid_size)))
-shuffle(possible_positions)
-cells_positions = possible_positions[:population]
 
-susceptibles = [Cell(SUSCEPTIBLE, *i) for i in cells_positions[:(int(population*s_ratio))]]
-infecteds = [Cell(INFECTIOUS, *i) for i in cells_positions[(int(population*s_ratio)):]]
-
-spread_function = Desease.neighborhood_1
-
-cells = susceptibles + infecteds
-desease = Desease(8, 10, spread_function)
-
-map_1 = Map(grid_size, grid_size, cells, desease)
+def fullfill_map(x_len, y_len, s_ratio):
+    possible_positions = list(product(range(x_len), range(y_len)))
+    shuffle(possible_positions)
+    population = len(possible_positions)
+    susceptibles = [Cell(SUSCEPTIBLE, *i) for i in possible_positions[:(int(population*s_ratio))]]
+    infecteds = [Cell(INFECTIOUS, *i) for i in possible_positions[(int(population*s_ratio)):]]
+    return susceptibles, infecteds
 
 
-while True:
-    print_matrix(map_1.map)
-    input("press enter to change t")
-    map_1.next_t()
+if __name__ == "__main__":
+    grid_size = 50
+    s_ratio = 0.85
+
+    susceptibles, infecteds = fullfill_map(grid_size, grid_size, s_ratio)
+
+    neighborhood_function = Desease.r_1
+
+    cells = susceptibles + infecteds
+    desease = Desease(4, 10, neighborhood_function, 2)
+
+    map_1 = Map(grid_size, grid_size, cells, desease)
+
+
+    while True:
+        print_matrix(map_1.map)
+        input("press enter to change t")
+        map_1.next_t()
 
