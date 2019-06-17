@@ -13,3 +13,10 @@
 # Modeling cholera rules
 - Cholera is endemic or epidemic
 - Once one's cured it is possible to be infectated again
+
+# Configuration used on the first demonstration
+- The choosen model was SIRS
+- The cells keep in Infected state for 10 unities of time, in order to mimic the 10 dais infection duration
+- The proximity function utilized considered all cells touching the one in question
+- The cells keep in Recovered state for 2 unities of time
+- The amount of infected neighbours need to infect cell is 4
