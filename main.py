@@ -4,6 +4,9 @@ from map_r import Map
 
 from itertools import product
 from random import shuffle
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import numpy as np
 
 import pandas as pd
 
@@ -11,18 +14,19 @@ SUSCEPTIBLE = "S"
 INFECTIOUS = "I"
 RECOVERED = "R"
 
-
-
-def print_matrix(map_m):
-    matrix = {}
-    for x in range(grid_size):
-        colum_x = {}
-        lista = list(filter(lambda key: key[0] == x, map_m.keys()))
-        for i in lista:
-            colum_x[i[1] + 1] = map_m[i].state
-        matrix[x + 1] = colum_x
-    df = pd.DataFrame(matrix)
-    print( df.to_string(na_rep="-"))
+def printable_matrix(map_m, grid_size):
+    universe = np.zeros((grid_size, grid_size))
+    for i in range(grid_size):
+        for j in range(grid_size):
+            state = map_m.map[(i, j)].state
+            if state == "S": 
+                int_state = 0
+            elif state == "I": 
+                int_state = 1
+            else:
+                int_state = 2
+            universe[i,j] = int_state
+    return universe
 
 
 def fullfill_map(x_len, y_len, s_ratio):
@@ -34,22 +38,30 @@ def fullfill_map(x_len, y_len, s_ratio):
     return susceptibles, infecteds
 
 
-if __name__ == "__main__":
-    grid_size = 50
-    s_ratio = 0.85
+grid_size = 50
+s_ratio = 0.85
 
-    susceptibles, infecteds = fullfill_map(grid_size, grid_size, s_ratio)
+susceptibles, infecteds = fullfill_map(grid_size, grid_size, s_ratio)
 
-    neighborhood_function = Desease.r_1
+neighborhood_function = Desease.r_1
 
-    cells = susceptibles + infecteds
-    desease = Desease(4, 10, neighborhood_function, 2)
+cells = susceptibles + infecteds
+desease = Desease(4, 10, neighborhood_function, 2)
 
-    map_1 = Map(grid_size, grid_size, cells, desease)
+map_1 = Map(grid_size, grid_size, cells, desease)
+
+fig = plt.figure()
 
 
-    while True:
-        print_matrix(map_1.map)
-        input("press enter to change t")
-        map_1.next_t()
+def update_matrix(i):
+    global map_1, grid_size
+    map_1.next_t()
+    matrix = printable_matrix(map_1, grid_size)
+    plt.cla()
+    im = plt.imshow(matrix)
+    return [im]
+
+ani = animation.FuncAnimation(fig, update_matrix, interval=50, blit=True)
+plt.show()
+
 
