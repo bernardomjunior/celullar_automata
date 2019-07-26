@@ -24,8 +24,8 @@ class sir_model:
     def dI_dt(self, a, B, K, S, r, I):
         return a * self.λ(B, K) * S - (r * I)
 
-    def dB_dt(self, B, n, b, m, e, I):
-        return ( B * ( (n*b) - (m*b) )) + (e * I)
+    def dB_dt(self, B, nb, mb, e, I):
+        return ( B * (nb - mb)) + (e * I)
 
     def λ(self, B, K):
         return B / (K + B)
