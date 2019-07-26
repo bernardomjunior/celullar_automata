@@ -1,6 +1,7 @@
 from cell import Cell
 from desease import Desease
 from map_r import Map
+from sir import Sir_Model
 
 from itertools import product
 from random import shuffle
@@ -37,7 +38,7 @@ def fullfill_map(x_len, y_len, s_ratio):
     return susceptibles, infecteds
 
 
-grid_size = 50
+grid_size = 500
 s_ratio = 0.85
 
 susceptibles, infecteds = fullfill_map(grid_size, grid_size, s_ratio)
@@ -47,7 +48,9 @@ neighborhood_function = Desease.r_1
 cells = susceptibles + infecteds
 desease = Desease(4, 10, neighborhood_function, 2)
 
-map_1 = Map(grid_size, grid_size, cells, desease)
+sir = Sir_Model()
+
+map_1 = Map(grid_size, grid_size, cells, desease, sir)
 
 fig = plt.figure()
 
