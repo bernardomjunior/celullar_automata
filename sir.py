@@ -8,20 +8,17 @@ class Sir_Model:
         self.B = 0
         self.t = 0
         self.population = self.S + self.I + self.R
-        for i in range(5000):
-            print(f"S({self.t}): {self.S}")
-            print(f"I({self.t}): {self.I}")
-            print(f"B({self.t}): {self.B}")
-            print(f'R({self.t}): {self.R}')
-            self.next_t()
 
 
     def next_t(self):
         self.S += round(self.dS_dt())
         self.I += round(self.dI_dt())
         self.B += round(self.dB_dt())
-        self.R = self.population - self.S - self.I
+        new_r = self.population - self.S - self.I
+        dR_dt = self.R - new_r #needed to return
+        self.R = new_r
         self.t += 1
+        return round(self.dS_dt()), round(self.dI_dt()), dR_dt
 
 
     def dS_dt(self):
@@ -66,6 +63,3 @@ class Sir_Model:
         self.nb_mb = -0.33
         self.e = 10
         self.SC = 6_600
-
-if __name__ == "__main__":
-    a = Sir_Model()

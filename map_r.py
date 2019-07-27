@@ -5,6 +5,7 @@ RECOVERED = "R"
 class Map:
     
     def __init__(self, widht, height, cells, desease, sir):
+        self.sir = sir
         self.map = {}
         self.map_b = (widht-1, height-1)
         self.__t = 0
@@ -33,39 +34,47 @@ class Map:
         t_list = [1 for nei in neighbors if nei.state == INFECTIOUS]
         return sum(t_list)
 
+    
+    def count_infectious_neighbors(self, cell):
+        neighbors = self.__get_neighbors(cell)
+        t_list = [1 for nei in neighbors if nei.state == INFECTIOUS]
+        return sum(t_list)
+
+
     def rank_cells(self, cells):
-        pass
+        """
+        Rank all cells by class
+        """
+        infectious = list(filter(lambda cell: cell.next_state == INFECTIOUS, cells))
+        susceptible = list(filter(lambda cell: cell.next_state == SUSCEPTIBLE, cells))
+        recovered = list(filter(lambda cell: cell.next_state == RECOVERED, cells))
+        ranked_infectious = infectious.sort(key=lambda cell: cell.get_counter_state, reverse=True)
+        ranked_susceptible = susceptible.sort(key=self.count_infectious_neighbors, reverse=True)
+        ranked_recovered = recovered.sort(key=lambda cell: cell.get_counter_state, reverse=True)
+        return ranked_susceptible, ranked_infectious, ranked_recovered
     
-    def rank_sucessibles(self, susceptibles):
-        pass
-
-    def rank_infectious(self, infectious):
-        pass
-    
-    def rank_recovered(self, )
-
-    def get_
-
-    # def __get_next_status(self, cell):
-    #     """
-    #     Get cell next state consedering: 
-    #         Cell state,
-    #         Desease contamination number, 
-    #         The amount of infectious neighbors,
-    #         Desease recouvery length.
-    #     """
-    #     neighbors = self.__get_neighbors(cell)
-    #     c_number = self.desease.contamination_number
-    #     infect_duration = self.desease.infection_duration
-    #     recovered_length = self.desease.recovered_length
-    #     if cell.state == INFECTIOUS and cell.get_counter_state() >= infect_duration:
-    #         cell.next_state = RECOVERED
-    #     elif cell.state == SUSCEPTIBLE and self.__count_d_nei(neighbors) >= c_number:
-    #         cell.next_state = INFECTIOUS
-    #     elif cell.state == RECOVERED and cell.get_counter_state() >= recovered_length:
-    #         cell.next_state = SUSCEPTIBLE
+    def __get_next_status(self, cell):
+        """
+        Get cell next state consedering: 
+            Cell state,
+            Desease contamination number, 
+            The amount of infectious neighbors,
+            Desease recouvery length.
+        """
+        neighbors = self.__get_neighbors(cell)
+        c_number = self.desease.contamination_number
+        infect_duration = self.desease.infection_duration
+        recovered_length = self.desease.recovered_length
+        if cell.state == INFECTIOUS and cell.get_counter_state() >= infect_duration:
+            cell.next_state = RECOVERED
+        elif cell.state == SUSCEPTIBLE and self.__count_d_nei(neighbors) >= c_number:
+            cell.next_state = INFECTIOUS
+        elif cell.state == RECOVERED and cell.get_counter_state() >= recovered_length:
+            cell.next_state = SUSCEPTIBLE
            
     def next_t(self):
-        # [self.__get_next_status(cell) for cell in self.cells]
-        self.rank_sucessible_cells(self.cells)
+        [self.__get_next_status(cell) for cell in self.cells]
+        dS_dt, dI_dt, dR_dt = self.sir.next_t()
+        ranked_susceptible, ranked_infectious, ranked_recovered = self.rank_cells(self.cells)
+        # [ranked_susceptible[i].next_state = INFECTIOUS for i in range()]
         [cell.update_state() for cell in self.cells]
