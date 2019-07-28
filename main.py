@@ -9,61 +9,94 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
 
+import pygame
 
 SUSCEPTIBLE = "S"
 INFECTIOUS = "I"
 RECOVERED = "R"
 
-def printable_matrix(map_m, grid_size):
-    universe = np.zeros((grid_size, grid_size))
-    for i in range(grid_size):
-        for j in range(grid_size):
-            state = map_m.map[(i, j)].state
-            if state == "S": 
-                int_state = 0
-            elif state == "I": 
-                int_state = 1
-            else:
-                int_state = 2
-            universe[i,j] = int_state
-    return universe
+SUSCEPTIBLE_COLOR = (0,0,255)
+INFECTIOUS_COLOR = (255,0,0)
+RECOVERED_COLOR = (0,255,0)
 
-
-def fullfill_map(x_len, y_len, s_ratio):
+def fullfill_map(x_len, y_len, sir):
     possible_positions = list(product(range(x_len), range(y_len)))
     shuffle(possible_positions)
     population = len(possible_positions)
-    susceptibles = [Cell(SUSCEPTIBLE, *i) for i in possible_positions[:(int(population*s_ratio))]]
-    infecteds = [Cell(INFECTIOUS, *i) for i in possible_positions[(int(population*s_ratio)):]]
+    susceptibles = [Cell(SUSCEPTIBLE, *i) for i in possible_positions[:(int(sir.H))]]
+    infecteds = [Cell(INFECTIOUS, *i) for i in possible_positions[(int(sir.H)):]]
     return susceptibles, infecteds
 
 
-grid_size = 500
-s_ratio = 0.85
+def main():
 
-susceptibles, infecteds = fullfill_map(grid_size, grid_size, s_ratio)
+    GRID_SIZE = (110, 100)
 
-neighborhood_function = Desease.r_1
+    sir = Sir_Model()
+    susceptibles, infecteds = fullfill_map(GRID_SIZE[0], GRID_SIZE[1], sir)
 
-cells = susceptibles + infecteds
-desease = Desease(4, 10, neighborhood_function, 2)
+    neighborhood_function = Desease.r_1
 
-sir = Sir_Model()
-
-map_1 = Map(grid_size, grid_size, cells, desease, sir)
-
-fig = plt.figure()
+    cells = susceptibles + infecteds
+    desease = Desease(4, 10, neighborhood_function, 2)
 
 
-def update_matrix(i):
-    global map_1, grid_size
-    map_1.next_t()
-    matrix = printable_matrix(map_1, grid_size)
-    plt.cla()
-    im = plt.imshow(matrix)
-    return [im]
+    map_1 = Map(GRID_SIZE[0], GRID_SIZE[1], cells, desease, sir)
+    
+    
+    # This sets the WIDTH and HEIGHT of each grid location
+    BLOCK_SIZE = 5
+    
+    # Initialize pygame
+    pygame.init()
+    
+    # Set the HEIGHT and WIDTH of the screen
+    WINDOW_SIZE = [GRID_SIZE[0] * BLOCK_SIZE, GRID_SIZE[1] * BLOCK_SIZE]
+    screen = pygame.display.set_mode(WINDOW_SIZE)
+    
+    # Set title of screen
+    pygame.display.set_caption("Cholera")
+    
+    # Loop until the user clicks the close button.
+    done = False
+    
+    # Used to manage how fast the screen updates
+    clock = pygame.time.Clock()
+    
+    # -------- Main Program Loop -----------
+    while not done:
+        for event in pygame.event.get():  # User did something
+            if event.type == pygame.QUIT:  # If user clicked close
+                done = True  # Flag that we are done so we exit this loop
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                map_1.next_t()
+                print("next t")
+    
+        # Set the screen background
+        screen.fill(RECOVERED_COLOR)
+        
+        for i in range(GRID_SIZE[0]):
+            for j in range(GRID_SIZE[1]):
+                color = RECOVERED_COLOR
+                if map_1.map[(i, j)].state == SUSCEPTIBLE:
+                    color = SUSCEPTIBLE_COLOR
+                if map_1.map[(i, j)].state == INFECTIOUS:
+                    color = INFECTIOUS_COLOR
+                pygame.draw.rect(screen,
+                                color,
+                                [(BLOCK_SIZE) * i,
+                                (BLOCK_SIZE) * j,
+                                BLOCK_SIZE,
+                                BLOCK_SIZE])
 
-ani = animation.FuncAnimation(fig, update_matrix, interval=50, blit=True)
-plt.show()
+    
+        # Limit to 60 frames per second
+        clock.tick(60)
+    
+        # Go ahead and update the screen with what we've drawn.
+        pygame.display.flip()
 
+    pygame.quit()
 
+if __name__ == "__main__":
+    main()

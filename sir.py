@@ -2,8 +2,9 @@
 class Sir_Model:
     def __init__(self):
         self.__c1()
+        # self.c_test()
         self.S = self.H
-        self.I = 100
+        self.I = 1000
         self.R = 0
         self.B = 0
         self.t = 0
@@ -15,9 +16,10 @@ class Sir_Model:
         self.I += round(self.dI_dt())
         self.B += round(self.dB_dt())
         new_r = self.population - self.S - self.I
-        dR_dt = self.R - new_r #needed to return
+        dR_dt = new_r - self.R #needed to return
         self.R = new_r
         self.t += 1
+        print(round(self.dS_dt()), round(self.dI_dt()), dR_dt)
         return round(self.dS_dt()), round(self.dI_dt()), dR_dt
 
 
@@ -56,6 +58,16 @@ class Sir_Model:
     
     def __c2(self):
         self.H = 10_000
+        self.n = 0.001
+        self.a = 1
+        self.K = 1_000_000
+        self.r = 0.2
+        self.nb_mb = -0.33
+        self.e = 10
+        self.SC = 6_600
+    
+    def c_test(self):
+        self.H = 2400
         self.n = 0.001
         self.a = 1
         self.K = 1_000_000

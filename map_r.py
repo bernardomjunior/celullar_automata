@@ -48,9 +48,9 @@ class Map:
         infectious = list(filter(lambda cell: cell.next_state == INFECTIOUS, cells))
         susceptible = list(filter(lambda cell: cell.next_state == SUSCEPTIBLE, cells))
         recovered = list(filter(lambda cell: cell.next_state == RECOVERED, cells))
-        ranked_infectious = infectious.sort(key=lambda cell: cell.get_counter_state, reverse=True)
-        ranked_susceptible = susceptible.sort(key=self.count_infectious_neighbors, reverse=True)
-        ranked_recovered = recovered.sort(key=lambda cell: cell.get_counter_state, reverse=True)
+        ranked_infectious = sorted(infectious, key=lambda cell: cell.get_counter_state(), reverse=True)
+        ranked_susceptible = sorted(susceptible, key=self.count_infectious_neighbors, reverse=True)
+        ranked_recovered = sorted(recovered, key=lambda cell: cell.get_counter_state(), reverse=True)
         return ranked_susceptible, ranked_infectious, ranked_recovered
     
     def __get_next_status(self, cell):
@@ -72,9 +72,57 @@ class Map:
         elif cell.state == RECOVERED and cell.get_counter_state() >= recovered_length:
             cell.next_state = SUSCEPTIBLE
            
+    def get_deltas(self, cells):
+        old_s, new_s = 0, 0
+        old_i, new_i = 0, 0
+        old_r, new_r = 0, 0
+        for cell in cells:
+            if cell.state == SUSCEPTIBLE:
+                old_s += 1
+            elif cell.state == INFECTIOUS:
+                old_i += 1
+            elif cell.state == RECOVERED:
+                old_r += 1
+            if cell.next_state == SUSCEPTIBLE:
+                new_s += 1
+            elif cell.next_state == INFECTIOUS:
+                new_i += 1
+            elif cell.next_state == RECOVERED:
+                new_r += 1
+        delta_s = old_s - new_s
+        delta_i = old_i - new_i
+        delta_r = old_r - new_r
+        return delta_s, delta_i, delta_r
+
+    def compute_commute(self, dif_s, dif_i, dif_r):
+        r1,r2,r3 = 0,0,0
+        while dif_s < 0 or dif_i < 0 or dif_r < 0:
+            if dif_s < 0:
+                r1 -= dif_s
+                dif_i += dif_s
+                dif_s = 0
+            if dif_i < 0:
+                r2 -= dif_i
+                dif_r += dif_i
+                dif_i = 0
+            if dif_r < 0:
+                r3 -= dif_r
+                dif_s += dif_r
+                dif_r = 0
+        return r1,r2,r3
+    
+    def addapt_model_to_sir(self, dif_s, dif_i, dif_r, r_susceptible, r_infectious, r_recovered):
+        commute_s, commute_i, commute_r = self.compute_commute(dif_s, dif_i, dif_r)
+        [r_susceptible[i].next_state == INFECTIOUS for i in range(commute_s)]
+        [r_susceptible[i].next_state == RECOVERED for i in range(commute_i)]
+        [r_susceptible[i].next_state == SUSCEPTIBLE for i in range(commute_r)]
+
     def next_t(self):
         [self.__get_next_status(cell) for cell in self.cells]
         dS_dt, dI_dt, dR_dt = self.sir.next_t()
-        ranked_susceptible, ranked_infectious, ranked_recovered = self.rank_cells(self.cells)
+        delta_s, delta_i, delta_r = self.get_deltas(self.cells)
+        dif_s, dif_i, dif_r = dS_dt - delta_s, dI_dt - delta_i, dR_dt - delta_r
+        r_susceptible, r_infectious, r_recovered = self.rank_cells(self.cells)
+        self.addapt_model_to_sir(dif_s, dif_i, dif_r, r_susceptible, r_infectious, r_recovered)
         # [ranked_susceptible[i].next_state = INFECTIOUS for i in range()]
         [cell.update_state() for cell in self.cells]
