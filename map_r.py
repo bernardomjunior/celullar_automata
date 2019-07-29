@@ -113,9 +113,15 @@ class Map:
     
     def addapt_model_to_sir(self, dif_s, dif_i, dif_r, r_susceptible, r_infectious, r_recovered):
         commute_s, commute_i, commute_r = self.compute_commute(dif_s, dif_i, dif_r)
-        [r_susceptible[i].next_state == INFECTIOUS for i in range(commute_s)]
-        [r_susceptible[i].next_state == RECOVERED for i in range(commute_i)]
-        [r_susceptible[i].next_state == SUSCEPTIBLE for i in range(commute_r)]
+        for i in range(commute_s):
+            r_susceptible[i].next_state = INFECTIOUS
+        for i in range(commute_i):
+            r_susceptible[i].next_state = RECOVERED
+        for i in range(commute_r):
+            r_susceptible[i].next_state = SUSCEPTIBLE
+        # [r_susceptible[i].next_state = INFECTIOUS for i in range(commute_s)]
+        # [r_susceptible[i].next_state = RECOVERED for i in range(commute_i)]
+        # [r_susceptible[i].next_state = SUSCEPTIBLE for i in range(commute_r)]
 
     def next_t(self):
         [self.__get_next_status(cell) for cell in self.cells]
